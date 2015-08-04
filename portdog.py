@@ -5,12 +5,41 @@ from struct import *
 from collections import OrderedDict
 import os
 import commands
+import signal
 import optparse 
 #define ETH_P_ALL    0x0003
 
-parser = optparse.OptionParser("usage: %prog -t <time for sniff>")
+
+class bgcolors:
+	HEADER = '\033[95m'
+	OKBLUE = '\033[94m'
+	OKGREEN = '\033[92m'
+	WARNING = '\033[93m'
+	FAIL = '\033[91m'
+	ENDC = '\033[0m'
+	BOLD = '\033[1m'
+	UNDERLINE = '\033[4m'
+
+header = bgcolors.BOLD+bgcolors.OKGREEN+"""
+	------   -----  --------  -----------
+	|    |  |     | |      |  |         |
+	|  0 |  | ___ | |   0  |  |    ~    |
+	|  __|  ||   || |------|  -----||----
+	|  |    ||   || | | \ \	       ||
+	|  |    ||___|| | |  \ \       ||
+	|__|    |_____| | |   \ \      ||
+			--     --      ||
+	|____     _____     ______            
+	|    )   |     |   | -----
+	| 0 )    | --- |   | 
+	|  )     | | | |   |--|
+	| )      | --- |   |  |------
+	__|      |_____|   |__|_____|
+	"""+"\n"+"-"*55+"\n"+bgcolors.ENDC
+parser = optparse.OptionParser(header+"usage: %prog -t <time for sniff>")
 parser.add_option('-t','--time',dest='usertime',type='int', help='Time to sniff network in minutes (Use 0 for infinite wait)')
 (options,args) = parser.parse_args()
+
 
 if(options.usertime == None):
 	print parser.usage
@@ -33,15 +62,6 @@ scannedports = {}
 
 LANip = commands.getoutput("/sbin/ifconfig").split("\n")[1].split()[1][5:]
 
-class bgcolors:
-	HEADER = '\033[95m'
-	OKBLUE = '\033[94m'
-	OKGREEN = '\033[92m'
-	WARNING = '\033[93m'
-	FAIL = '\033[91m'
-	ENDC = '\033[0m'
-	BOLD = '\033[1m'
-	UNDERLINE = '\033[4m'
 
 def convert(dec):
 	final = []
@@ -60,6 +80,16 @@ def time_diff(outside,vaxt=5):
     netice = (time.time()-int(outside))/60
     if(netice>=vaxt):
         return True
+def show_ports(signum,frm):
+	for ips in scannedports:
+		for single in scannedports[ips]:
+			while(scannedports[ips].count(single)!=1):
+				scannedports[ips].remove(single)
+	print "\n\n"
+   
+	for ip in blacklist:
+		if(scannedports.has_key(str(ip)) and ip!=LANip):
+			print "Attacker from ip "+ip+" scanned ["+ ",".join(scannedports[ip])+"] ports."
 
 
 def threewaycheck(sip,dip,sport,dport,seqnum,acknum,flags):
@@ -274,24 +304,8 @@ except AttributeError:
 now = time.time()
 protocol_numb = {"1":"ICMP","6":"TCP","17":"UDP"}
 
+print header
 print bgcolors.BOLD+bgcolors.OKGREEN
-print "-"*55
-print """
-------   -----  --------  -----------
-|    |  |     | |      |  |         |
-|  0 |  | ___ | |   0  |  |    ~    |
-|  __|  ||   || |------|  -----||----
-|  |    ||   || | | \ \	       ||
-|  |    ||___|| | |  \ \       ||
-|__|    |_____| | |   \ \      ||
-		--     --      ||
-|____     _____     ______            
-|    )   |     |   | -----
-| 0 )    | --- |   | 
-|  )     | | | |   |--|
-| )      | --- |   |  |------
-__|      |_____|   |__|_____|
-"""
 print "-"*55
 print "Port Scanner Detector v1"
 print "-"*55
@@ -301,19 +315,21 @@ print ""
 print bgcolors.ENDC
 
 while True:
-    if(time_diff(now,timeforsniff)):
-        break
-     
-     
-    packet = s.recvfrom(65565)
-    packet = packet[0]
-    eth_length = 14
-    eth_header = packet[:eth_length]
-    eth = unpack('!6s6sH' , eth_header)
-    eth_protocol = socket.ntohs(eth[2])
-    dest_mac = eth_addr(packet[0:6])
-    source_mac = eth_addr(packet[6:12])
- 
+    if(timeforsniff!=0):    
+        if(time_diff(now,timeforsniff)):
+            break
+    try:
+    	packet = s.recvfrom(65565)
+        packet = packet[0]
+        eth_length = 14
+        eth_header = packet[:eth_length]
+        eth = unpack('!6s6sH' , eth_header)
+        eth_protocol = socket.ntohs(eth[2])
+        dest_mac = eth_addr(packet[0:6])
+        source_mac = eth_addr(packet[6:12])
+    except:
+	pass
+
     if eth_protocol == 8 :
         ip_header = packet[eth_length:20+eth_length]
       
@@ -351,18 +367,11 @@ while True:
 	    	threewaycheck(s_addr,d_addr,source_port,dest_port,seq_numb,dest_numb,tcp_flags)
 
 	    scancheck(s_addr,d_addr,source_port,dest_port,seq_numb,dest_numb,tcp_flags)
-	   
+	    try:
+	        signal.signal(signal.SIGINT,show_ports)	   
+	    except:
+		pass
 
-for ips in scannedports:
-	for single in scannedports[ips]:
-		while(scannedports[ips].count(single)!=1):
-			scannedports[ips].remove(single)
-
-print "\n\n"
-   
-for ip in blacklist:
-	if(scannedports.has_key(str(ip)) and ip!=LANip):
-		print "Attacker from ip "+ip+" scanned ["+ ",".join(scannedports[ip])+"] ports."
 
 
 
