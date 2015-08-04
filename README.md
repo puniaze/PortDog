@@ -4,7 +4,7 @@ PortDog is a network anomaly detector aimed to detect port scanning techniques. 
 
 Usage:
 
-sudo python portdog.py -t <time for sniff>
+sudo python portdog.py -t time_for_sniff_in_minutes
 
 For example, if you want to detect for 5 minutes use:
 
