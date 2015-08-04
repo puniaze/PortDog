@@ -8,8 +8,8 @@ import commands
 import optparse 
 #define ETH_P_ALL    0x0003
 
-parser = optparse.OptionParser("usage: %prog -t <sniff etmek ucun vaxt>")
-parser.add_option('-t','--time',dest='usertime',type='int', help='Sebekeni sniff etmek ucun vaxt')
+parser = optparse.OptionParser("usage: %prog -t <time for sniff>")
+parser.add_option('-t','--time',dest='usertime',type='int', help='Time to sniff network in minutes (Use 0 for infinite wait)')
 (options,args) = parser.parse_args()
 
 if(options.usertime == None):
@@ -19,16 +19,7 @@ if(options.usertime == None):
 
 timeforsniff=options.usertime
 
-
-global threewayhandshake
-global waiting
-global fullscandb
-global halfscandb
-global xmasscandb
-global nullscandb
-global finscandb
-global scannedports
-global blacklist
+global threewayhandshake,waiting,fullscandb,halfscandb,xmasscandb,nullscandb,finscandb,scannedports,blacklist
 
 blacklist = []
 fullscandb = {}
@@ -52,8 +43,6 @@ class bgcolors:
 	BOLD = '\033[1m'
 	UNDERLINE = '\033[4m'
 
-
-
 def convert(dec):
 	final = []
 	flags = OrderedDict([("128","CWR"),("64","ECE"),("32","URG"),("16","ACK"),("8","PSH"),("4","RST"),("2","SYN"),("1","FIN")])
@@ -62,6 +51,7 @@ def convert(dec):
 			dec = dec-int(i)
 			final.append(flags[i])
 	return final
+
 def eth_addr (a) :
     b = "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x" % (ord(a[0]) , ord(a[1]) , ord(a[2]), ord(a[3]), ord(a[4]) , ord(a[5]))
     return b
@@ -269,16 +259,16 @@ def ackscan(sip,dip,sport,dport,seqnum,acknum,flags):
 
   
 if(os.name=='nt'):
-    print "[*]Windows OS desteklemir"
+    print "[*]Doesn't work on Windows machine."
     sys.exit()
 
 try:
     s = socket.socket( socket.AF_PACKET , socket.SOCK_RAW , socket.ntohs(0x0003))
 except socket.error , msg:
-    print '[*]Socket yaranmadi! Error Code : ' + str(msg[0]) + ' Error Message ' + msg[1]
+    print '[*]Socket can\'t be created! Error Code : ' + str(msg[0]) + ' Error Message ' + msg[1]
     sys.exit()
 except AttributeError:
-    print "[*]Windows OS de AF_PACKET islemir."
+    print "[*]Windows OS doesn't support AF_PACKET."
     sys.exit()
   
 now = time.time()
