@@ -137,7 +137,7 @@ def fullconnectscan(sip,dip,sport,dport,seqnum,acknum,flags):
 			if(fullscandb.has_key(dbdata)):
 				counter = int(fullscandb[dbdata])
 				if(counter>=3):
-					#print dip+":"+str(dport)+"->"+sip+":"+str(sport)+" => [Runtime Detection:] Full connect scan detected!"
+					
 					if(str(dip) not in blacklist):
 						blacklist.append(str(dip))
 					return bgcolors.BOLD+bgcolors.OKBLUE+ dip+":"+str(dport)+"->"+sip+":"+str(sport)+bgcolors.ENDC+ bgcolors.BOLD+bgcolors.FAIL+" => [Runtime Detection:] Full connect scan detected!"+bgcolors.ENDC				
@@ -163,7 +163,7 @@ def fullconnectscan(sip,dip,sport,dport,seqnum,acknum,flags):
 					if(fullscandb.has_key(dbdata)):
 						counter = int(fullscandb[dbdata])
 						if(counter>=3):
-							#print dip+":"+str(dport)+"->"+sip+":"+str(sport)+" => [Runtime Detection:] Full connect scan detected!"
+							
 							if(str(dip) not in blacklist):
 								blacklist.append(str(dip))
 							return True
@@ -189,7 +189,7 @@ def halfconnectscan(sip,dip,sport,dport,seqnum,acknum,flags):
 			del halfscandb[reverse+"_"+str(acknum-1)]
 			if(str(dip) not in blacklist):
 				blacklist.append(str(dip))
-			#print dip+":"+str(dport)+"->"+sip+":"+str(sport) + " => [Runtime Detection:] Half connect(SYN scan) scan detected!"
+			
 			return True	
 	elif("SYN" in flags and "ACK" in flags and len(flags)==2):
 		if(halfscandb.has_key(reverse+"_"+str(acknum-1))):
@@ -199,7 +199,7 @@ def halfconnectscan(sip,dip,sport,dport,seqnum,acknum,flags):
 		if(halfscandb.has_key(dbdata+"_"+str(seqnum))):
 			if(str(dip) not in blacklist):
 				blacklist.append(str(dip))
-		#print sip+":"+str(sport)+"->"+dip+":"+str(dport) + " => [Runtime Detection:] Half connect(SYN scan) scan detected!"
+		
 			return bgcolors.BOLD+bgcolors.OKBLUE+sip+":"+str(sport)+"->"+dip+":"+str(dport) +bgcolors.ENDC+ bgcolors.BOLD+bgcolors.FAIL+" => [Runtime Detection:] Half connect(SYN scan) scan detected!"+bgcolors.ENDC
 	return False
 	
@@ -214,7 +214,7 @@ def xmasscan(sip,dip,sport,dport,seqnum,acknum,flags):
 		scannedports[dip].append(str(sport))
 	
 	if("FIN" in flags and "URG" in flags and "PSH" in flags and len(flags)==3):
-		#print dataforthreewaycheck + " => [Runtime Detection:] XMAS scan detected!"
+		
 		if(str(sip) not in blacklist):	
 			blacklist.append(str(sip))
 		return True
@@ -229,9 +229,7 @@ def finscan(sip,dip,sport,dport,seqnum,acknum,flags):
 		scannedports[dip].append(str(sport))
 	
 	if(dataforthreewaycheck not in threewayhandshake):
-		if("FIN" in flags and len(flags)==1):
-			#print dataforthreewaycheck+ " => [Runtime Detection:] FIN scan detected!"
-			
+		if("FIN" in flags and len(flags)==1):			
 			if(str(sip) not in blacklist):	
 				blacklist.append(str(sip))
 			return True
@@ -245,7 +243,6 @@ def nullscan(sip,dip,sport,dport,seqnum,acknum,flags):
 		scannedports[dip] = []
 		scannedports[dip].append(str(sport))
 	if(len(flags)==0):
-		#print dataforthreewaycheck + " => [Runtime Detection:] NULL scan detected!"
 		if(str(sip) not in blacklist):	
 			blacklist.append(str(sip))
 		return True
@@ -263,7 +260,6 @@ def ackscan(sip,dip,sport,dport,seqnum,acknum,flags):
 
 	if(dataforthreewaycheck not in threewayhandshake):
 		if("ACK" in flags and len(flags)==1):
-			#print dataforthreewaycheck+ " => [Runtime Detection:] ACK scan for firewall testing detected!"
 			
 			if(str(sip) not in blacklist):	
 				blacklist.append(str(sip))
