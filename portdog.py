@@ -36,7 +36,7 @@ header = bgcolors.BOLD+bgcolors.OKGREEN+"""
 	| )      | --- |   |  |------
 	__|      |_____|   |__|_____|
 	"""+"\n"+"-"*55+"\n"+bgcolors.ENDC
-parser = optparse.OptionParser(header+"usage: %prog -t <time for sniff>")
+parser = optparse.OptionParser(header+"usage: %prog -t <time for sniff in minutes>")
 parser.add_option('-t','--time',dest='usertime',type='int', help='Time to sniff network in minutes (Use 0 for infinite wait)')
 (options,args) = parser.parse_args()
 
